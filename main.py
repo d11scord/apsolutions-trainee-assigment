@@ -1,12 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
 
-app = FastAPI(title="ESearch Engine", openapi_url="/docs.json")
+from src.app import create_app
 
-
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
+app: FastAPI = create_app()
 
 
 if __name__ == '__main__':
