@@ -1,4 +1,3 @@
-# from gino_starlette import Gino
 from gino.ext.starlette import Gino
 
 from src.store.config import DB_DSN
