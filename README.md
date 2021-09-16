@@ -36,6 +36,7 @@ venv\Scripts\activate
 + Запустите скрипт из корня проекта для заполнения БД постами: 
 
 ```
+alembic upgrade head
 python populate.py
 ```
 
