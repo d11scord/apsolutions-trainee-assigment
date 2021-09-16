@@ -14,7 +14,7 @@
 
 Проверьте, что в системе установлены `Docker` и `Docker-compose`. После введите команду:
 ```
-docker-compose up --build -b
+docker-compose up --build -d
 ```
 
 Она запустит три контейнера — приложение `FastAPI`, `Elasticsearch` и `PostgreSQL`.
