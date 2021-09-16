@@ -18,3 +18,7 @@ DB_DSN = URL(
     port=DB_PORT,
     database=DB_DATABASE,
 )
+
+ES_INDEX = getenv("ES_INDEX", "docs_test")
+ES_HOST = getenv("ES_HOST", "localhost")
+ES_PORT = getenv("ES_PORT", 9200)

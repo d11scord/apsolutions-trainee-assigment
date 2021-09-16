@@ -1,16 +1,16 @@
 import json
-import os
 from typing import Optional, List
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 
+from src.store.config import ES_INDEX, ES_HOST, ES_PORT
 from src.store.schemas import DocumentSchema
 
 
 class EsManagement:
     def __init__(self):
         self.es_client = AsyncElasticsearch(
-            hosts=[{'host': 'localhost', 'port': 9200}]
+            hosts=[{'host': ES_HOST, 'port': ES_PORT}]
         )
         self.index_name: Optional[str] = None
 
@@ -74,7 +74,7 @@ class EsManagement:
 
 async def get_es():
     es = EsManagement()
-    await es.create_index(os.getenv("ES_INDEX", "docs_test"))
+    await es.create_index(ES_INDEX)
     try:
         yield es
     finally:
