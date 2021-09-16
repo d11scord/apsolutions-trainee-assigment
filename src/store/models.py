@@ -1,6 +1,6 @@
 from typing import List
 
-from src.store import db
+from src.store.database import db
 from src.store.schemas import CreateRubricSchema
 
 
@@ -41,8 +41,8 @@ class Document(db.Model):
         super().__init__(**kw)
         self.rubrics = set()
 
-    def add_rubric(self, rubric):
-        self.rubrics.add(rubric)
+    def add_rubric(self, rubric: Rubric):
+        self.rubrics.add(rubric.title)
 
     async def add_rubrics(self, rubrics: List[Rubric]):
         for rub in rubrics:

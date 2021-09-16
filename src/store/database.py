@@ -1,7 +1,8 @@
+from typing import List
+
 from gino.ext.starlette import Gino
 
 from src.store.config import DB_DSN
-
 
 db = Gino(
     dsn=DB_DSN,

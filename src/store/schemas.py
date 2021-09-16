@@ -31,4 +31,4 @@ class CreateDocumentSchema(BaseModel):
 
 
 class DocumentRubricSchema(DocumentSchema):
-    rubrics: List[RubricSchema]
+    rubrics: List[str]

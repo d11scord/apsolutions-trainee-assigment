@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from src.api.endpoints import router
-from src.store import db
+from src.store.database import db
 
 
 def create_app():

@@ -1,9 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from starlette.responses import RedirectResponse
 
-from src.store.elastic import EsClient, get_es
+from src.store.db_management import DbManagement, get_db
+from src.store.es_management import EsManagement, get_es
 from src.store.models import (
     Document,
     Rubric,
@@ -29,18 +30,17 @@ def main():
              tags=["documents"])
 async def add_document(
     document: CreateDocumentSchema,
-    es_client: EsClient = Depends(get_es),
+    db: DbManagement = Depends(get_db),
+    es: EsManagement = Depends(get_es),
 ):
     rubrics: List[Rubric] = list()
     for rub in document.rubrics:
         item = await Rubric.get_or_create(rub)
         rubrics.append(item)
 
-    doc = await Document.create(text=document.text)
-    await doc.add_rubrics(rubrics)
-    doc = DocumentSchema(**doc.to_dict())
-    await es_client.add_document(doc)
-    return doc.dict()
+    doc = await db.create_document_with_rubrics(document.text, rubrics)
+    await es.add_document(doc)
+    return doc
 
 
 @router.get("/documents/search/{query}",
@@ -48,47 +48,46 @@ async def add_document(
             tags=["documents"])
 async def search(
     query: str,
-    es_client: EsClient = Depends(get_es),
+    db: DbManagement = Depends(get_db),
+    es: EsManagement = Depends(get_es),
 ):
-    docs_ids = await es_client.search(query)
-
-    # https://python-gino.org/docs/en/1.0/how-to/loaders.html#other-relationships
-    query = (
-        Document.outerjoin(DocumentsRubrics).outerjoin(Rubric)
-        .select()
-        .where(Document.id.in_(docs_ids))
-        .order_by(Document.created_date.desc())
-    )
-    full_docs = (
-        await query.gino.load(Document.distinct(Document.id).load(
-                add_rubric=Rubric.distinct(Rubric.id)
-            )
-        ).all()
-    )
-
-    return [DocumentRubricSchema.from_orm(doc) for doc in full_docs]
+    docs_ids = await es.search(query)
+    documents = await db.search_by_ids(docs_ids)
+    return documents
 
 
-@router.delete("/documents/{id}", tags=["misc"])
+@router.delete("/documents/{doc_id}", tags=["documents"])
 async def delete_document(
     doc_id: int,
-    es_client: EsClient = Depends(get_es),
+    db: DbManagement = Depends(get_db),
+    es: EsManagement = Depends(get_es),
 ):
-    doc = await Document.get_or_404(doc_id)
-    await doc.delete()
-    await es_client.delete_document(doc_id)
-    return dict(id=doc_id)
+    id_ = await db.delete_document_by_id(doc_id)
+    if not id_:
+        raise HTTPException(status_code=404, detail=f"Document with id={doc_id} not found")
+    await es.delete_document(doc_id)
+    return dict(id=id_)
 
 
 @router.get("/documents/",
             response_model=List[DocumentSchema],
             tags=["misc"])
-async def list_documents():
-    documents = await Document.query.gino.all()
+async def list_documents(offset: int = 0, limit: int = 25):
+    documents = (
+        await Document.query
+        .offset(offset)
+        .limit(limit)
+        .gino.all()
+    )
     return [DocumentSchema.from_orm(doc) for doc in documents]
 
 
 @router.get("/rubrics/", response_model=List[RubricSchema], tags=["misc"])
-async def list_rubrics():
-    rubs = await Rubric.query.gino.all()
+async def list_rubrics(offset: int = 0, limit: int = 25):
+    rubs = (
+        await Rubric.query
+            .offset(offset)
+            .limit(limit)
+            .gino.all()
+    )
     return [RubricSchema.from_orm(rub) for rub in rubs]

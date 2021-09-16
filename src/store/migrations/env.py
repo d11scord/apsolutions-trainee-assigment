@@ -21,7 +21,7 @@ fileConfig(config.config_file_name)
 
 from src.store.config import DB_DSN
 from src.app import create_app
-from src.store import db
+from src.store.database import db
 
 create_app()
 config.set_main_option("sqlalchemy.url", str(DB_DSN))
