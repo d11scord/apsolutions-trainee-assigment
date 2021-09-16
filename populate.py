@@ -4,9 +4,9 @@ import re
 from datetime import datetime
 from typing import List
 
-from src.store import db
+from src.store.database import db
 from src.store.config import DB_DSN
-from src.store.elastic import EsClient
+from src.store.es_management import EsManagement
 from src.store.models import Rubric, Document
 from src.store.schemas import CreateRubricSchema, DocumentSchema
 
@@ -15,7 +15,7 @@ async def populate():
     await db.set_bind(DB_DSN)
     await db.gino.create_all()
 
-    es_client = EsClient()
+    es_client = EsManagement()
     await es_client.create_index("docs_test7")
 
     with open("posts.csv", encoding="utf-8") as f:
