@@ -47,7 +47,6 @@ class EsManagement:
 
         hits_list = result["hits"]["hits"]
         doc_ids = [int(hit["_id"]) for hit in hits_list]
-        print(doc_ids)
         return doc_ids
 
     async def add_document(self, document: DocumentSchema) -> None:

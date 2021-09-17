@@ -8,7 +8,6 @@ from src.store.es_management import EsManagement, get_es
 from src.store.models import (
     Document,
     Rubric,
-    DocumentsRubrics,
 )
 from src.store.schemas import (
     DocumentSchema,
@@ -86,8 +85,8 @@ async def list_documents(offset: int = 0, limit: int = 25):
 async def list_rubrics(offset: int = 0, limit: int = 25):
     rubs = (
         await Rubric.query
-            .offset(offset)
-            .limit(limit)
-            .gino.all()
+        .offset(offset)
+        .limit(limit)
+        .gino.all()
     )
     return [RubricSchema.from_orm(rub) for rub in rubs]
