@@ -12,4 +12,6 @@ ENV PYTHONPATH=/app/
 
 EXPOSE 8080
 
-#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# https://github.com/ufoscout/docker-compose-wait
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait /wait
+RUN chmod +x /wait

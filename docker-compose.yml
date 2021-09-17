@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: web
+    restart: always
     command: >
       bash -c "alembic upgrade head
       && python populate.py
@@ -14,6 +15,7 @@ services:
       POSTGRES_HOST: db
       ES_INDEX: documents
       ES_HOST: es
+      WAIT_HOSTS: pg_db:5432, es:9200
     ports:
       - 8080:8080
     depends_on:
@@ -22,6 +24,7 @@ services:
 
   pg_db:
     image: postgres:13.4
+    restart: always
     container_name: db
     environment:
       POSTGRES_USER: julia
@@ -33,6 +36,7 @@ services:
   es:
     image: elasticsearch:7.14.1
     container_name: es
+    restart: always
     environment:
       - node.name=es01
       - cluster.initial_master_nodes=es01
